@@ -1,5 +1,6 @@
 from safe import BOT
 from Requests.League.profiles import profile_requests
+from helpers.League.profile_helpers import clean_input
 import discord
 from discord.ext import commands
 import sys
@@ -12,13 +13,11 @@ class LeagueProfiles(commands.Cog):
         self.request = profile_requests(BOT.get("API_KEY"))
 
     @commands.command(name="GetRank", help="Prints out ranks of the user", aliases=['getrank'])
-    async def print_ranked_stats(self, ctx, name):
-        nameHere = name
-        profile_info = self.request.get_profile_info(nameHere)
+    async def print_ranked_stats(self, ctx, *name):
+        parsed_name = clean_input(name)
+        profile_info = self.request.get_profile_info(parsed_name)
         summonerIconID = profile_info[0]['profileIconId']
         ranks_info = list(map(self._extract_ranks, profile_info[1]))
-        # print(list(ranks_info))
-        # print(list(ranks_info))
         await ctx.send(embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
 
     def _extract_ranks(self, league):
@@ -26,7 +25,7 @@ class LeagueProfiles(commands.Cog):
         words = league['queueType'].split('_')
         queueType = []
         for word in words:
-          queueType.append(word.capitalize())
+            queueType.append(word.capitalize())
         rank_info = {
             'queue_type': " ".join(queueType),
             'tier': tier,
@@ -41,7 +40,6 @@ class LeagueProfiles(commands.Cog):
         embed = discord.Embed(color=0x00ff00)
         embed.set_author(
             name=name, icon_url=f"http://ddragon.leagueoflegends.com/cdn/10.18.1/img/profileicon/{icon}.png")
-        #print(f'Inside build embed: {self._get_highest_rank(ranks)}')
         embed.set_thumbnail(url=self._get_highest_rank(ranks))
         for queue in ranks:
             print('Added field')
@@ -64,17 +62,15 @@ class LeagueProfiles(commands.Cog):
             "grandmaster": [7, 'https://fvhs-bot.s3-us-west-1.amazonaws.com/Emblem_Grandmaster.png'],
             "challenger": [8, 'https://fvhs-bot.s3-us-west-1.amazonaws.com/Emblem_Challenger.png']
         }
-        # print(ranks)
         highest_rank = ""
         for rank in ranks:
             current_rank = ranksDict[rank['tier'].lower()]
             print(f'rank: {current_rank}')
-            if (highest_rank == ""):
+            if highest_rank == "":
                 highest_rank = current_rank
             else:
                 if (highest_rank[0] < current_rank[0]):
                     highest_rank = current_rank
-        #print(f'Highest Rank: {highest_rank}')
         return highest_rank[1]
 
 
