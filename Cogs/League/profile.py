@@ -16,9 +16,14 @@ class LeagueProfiles(commands.Cog):
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
         profile_info = self.request.get_profile_info(parsed_name)
-        summonerIconID = profile_info[0]['profileIconId']
-        ranks_info = list(map(self._extract_ranks, profile_info[1]))
-        await ctx.send(embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
+        print(f'print: {profile_info}')
+        if (profile_info[1] == '404'):
+            await ctx.send('Error, Summoner not found!')
+        else:
+            summonerIconID = profile_info[0]['profileIconId']
+            profile_info[1] = self._fill_blanks(profile_info[1])
+            ranks_info = list(map(self._extract_ranks, profile_info[1]))
+            await ctx.send(embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
 
     def _extract_ranks(self, league):
         tier = league['tier'].lower().capitalize()
@@ -34,6 +39,7 @@ class LeagueProfiles(commands.Cog):
             'league_points': league['leaguePoints'],
             'losses': league['losses']
         }
+        print(f'extract:{rank_info}')
         return rank_info
 
     def _build_ranked_embed(self, name, icon, ranks):
@@ -52,6 +58,7 @@ class LeagueProfiles(commands.Cog):
 
     def _get_highest_rank(self, ranks):
         ranksDict = {
+            "unranked": [-1, 'https://static.wikia.nocookie.net/leagueoflegends/images/3/38/Season_2019_-_Unranked.png'],
             "iron": [0, 'https://fvhs-bot.s3-us-west-1.amazonaws.com/Emblem_Iron.png'],
             "bronze": [1, 'https://fvhs-bot.s3-us-west-1.amazonaws.com/Emblem_Bronze.png'],
             "silver": [2, 'https://fvhs-bot.s3-us-west-1.amazonaws.com/Emblem_Silver.png'],
@@ -72,6 +79,34 @@ class LeagueProfiles(commands.Cog):
                 if (highest_rank[0] < current_rank[0]):
                     highest_rank = current_rank
         return highest_rank[1]
+
+    def _fill_blanks(self, ranks):
+        new_ranks = ranks
+        blank_flex = {
+            'queueType': 'Ranked Flex Sr',
+            'tier': 'unranked',
+            'rank': '',
+            'wins': '~',
+            'leaguePoints': 'N/A',
+            'losses': '~'
+        }
+        blank_solo = {
+            'queueType': 'Ranked Solo 5x5',
+            'tier': 'unranked',
+            'rank': '',
+            'wins': '~',
+            'leaguePoints': 'N/A',
+            'losses': '~'
+        }
+        if (len(new_ranks) == 0):
+            new_ranks.append(blank_flex)
+            new_ranks.append(blank_solo)
+        elif (len(new_ranks) == 1):
+            if (new_ranks[0]['queueType'] == 'RANKED_SOLO_5x5'):
+                new_ranks.append(blank_flex)
+            else:
+                new_ranks.append(blank_solo)
+        return new_ranks
 
 
 def setup(client):
