@@ -17,24 +17,23 @@ async def on_ready():
 
 @client.event
 async def on_error(event, *args, **kwargs):
-    if event != 'on_command_error':
-        embed = discord.Embed(title=':x: Event Error',
+    embed = discord.Embed(title=':x: Event Error',
                           colour=0xe74c3c)  # Red
-        embed.add_field(name='Event', value=event)
-        embed.description = '```py\n%s\n```' % traceback.format_exc()
-        embed.timestamp = datetime.datetime.utcnow()
-        await client.appinfo.owner.send(embed=embed)
+    embed.add_field(name='Event', value=event)
+    embed.description = '```py\n%s\n```' % traceback.format_exc()
+    embed.timestamp = datetime.datetime.utcnow()
+    await client.appinfo.owner.send(embed=embed)
 
 
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.channel.send('{} Command on cooldown, try again').format(ctx.author)
-    if isinstance(error, commands.CommandNotFound):
+        await ctx.channel.send(f'{ctx.author.mention} Command on cooldown, try again')
+    elif isinstance(error, commands.CommandNotFound):
         await ctx.channel.send(f'{ctx.author.mention} Command not found! Check your spelling')
     else:
         await ctx.channel.send(f'{ctx.author.mention} Error! Issue sent to bot author')
-    raise error
+        raise error
 
 
 @client.command(name="ping", help="Replies with the bot latency")

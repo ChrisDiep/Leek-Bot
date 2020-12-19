@@ -18,7 +18,7 @@ class LeagueProfiles(commands.Cog):
         parsed_name = clean_input(name)
         profile_info = self.request.get_profile_info(parsed_name)
         if (profile_info[1] == '404'):
-            await ctx.send('Error, Summoner not found!')
+            await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
         else:
             summonerIconID = profile_info[0]['profileIconId']
             profile_info[1] = self._fill_blanks(profile_info[1])
