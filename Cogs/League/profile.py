@@ -13,10 +13,10 @@ class LeagueProfiles(commands.Cog):
         self.request = profile_requests(BOT.get("API_KEY"))
 
     @commands.command(name="GetRank", help="Prints out ranks of the user", aliases=['getrank'])
+    @commands.cooldown(1, 1, commands.BucketType.default)
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
         profile_info = self.request.get_profile_info(parsed_name)
-        print(f'print: {profile_info}')
         if (profile_info[1] == '404'):
             await ctx.send('Error, Summoner not found!')
         else:
@@ -39,7 +39,6 @@ class LeagueProfiles(commands.Cog):
             'league_points': league['leaguePoints'],
             'losses': league['losses']
         }
-        print(f'extract:{rank_info}')
         return rank_info
 
     def _build_ranked_embed(self, name, icon, ranks):
@@ -48,10 +47,9 @@ class LeagueProfiles(commands.Cog):
             name=name, icon_url=f"http://ddragon.leagueoflegends.com/cdn/10.18.1/img/profileicon/{icon}.png")
         embed.set_thumbnail(url=self._get_highest_rank(ranks))
         for queue in ranks:
-            print('Added field')
             embed.add_field(
                 name=queue['queue_type'],
-                value=f'Rank: {queue["tier"]} {queue["rank"]} \n W/L: {queue["wins"]}/{queue["losses"]}',
+                value=f'Rank: {queue["tier"]} {queue["rank"]} \n W/L: {queue["wins"]}/{queue["losses"]} \n LP: {queue["league_points"]}',
                 inline=True
             )
         return embed
@@ -72,7 +70,6 @@ class LeagueProfiles(commands.Cog):
         highest_rank = ""
         for rank in ranks:
             current_rank = ranksDict[rank['tier'].lower()]
-            print(f'rank: {current_rank}')
             if highest_rank == "":
                 highest_rank = current_rank
             else:
