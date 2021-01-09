@@ -12,7 +12,7 @@ class LeagueProfiles(commands.Cog):
         self.client = client
         self.request = profile_requests(BOT.get("API_KEY"))
 
-    @commands.command(name="GetRank", help="Prints out ranks of the user", aliases=['getrank'])
+    @commands.command(name="GetRank", help="Prints out ranks of the user", aliases=['getrank', 'rank'])
     @commands.cooldown(1, 1, commands.BucketType.default)
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
@@ -27,12 +27,9 @@ class LeagueProfiles(commands.Cog):
 
     def _extract_ranks(self, league):
         tier = league['tier'].lower().capitalize()
-        words = league['queueType'].split('_')
-        queueType = []
-        for word in words:
-            queueType.append(word.capitalize())
+        queue_type = league['queueType'].replace('_', ' ').title()
         rank_info = {
-            'queue_type': " ".join(queueType),
+            'queue_type': queue_type,
             'tier': tier,
             'rank': league['rank'],
             'wins': league['wins'],
