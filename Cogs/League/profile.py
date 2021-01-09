@@ -6,13 +6,14 @@ from discord.ext import commands
 import sys
 sys.path.append('/home/chris/Documents/VSCode/SideProjects/FVHSBot/')
 
+import json
 
 class LeagueProfiles(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.request = profile_requests(BOT.get("API_KEY"))
 
-    @commands.command(name="GetRank", help="Prints out ranks of the user", aliases=['getrank', 'rank'])
+    @commands.command(name="Rank", help="Prints out ranks of the user", aliases=['rank'])
     @commands.cooldown(1, 1, commands.BucketType.default)
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
@@ -24,6 +25,24 @@ class LeagueProfiles(commands.Cog):
             profile_info[1] = self._fill_blanks(profile_info[1])
             ranks_info = list(map(self._extract_ranks, profile_info[1]))
             await ctx.send(embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
+    @commands.command(name="Match", help="Prints out match information", aliases=["m","match"])
+    async def print_match_info(self, ctx, *name):
+        parsed_name = clean_input(name)
+        f = open("dummy.json")
+        profile_info = json.load(f)
+        await ctx.send(f'{ctx.author.mention}',embed=self._build_match_embed(profile_info))
+
+    def _build_match_embed(self, match_info):
+        embed = discord.Embed(title=match_info["gameMode"], description=match_info["gameLength"])
+        # embed.add_field(name="Summoner", value="Summoner1", inline=True)
+        # embed.add_field(name="Level", value="1", inline=True)
+        # embed.add_field(name="Rank", value="Silver I", inline=True)
+        # embed.add_field(name="\u200B",value: "\u200B")
+        embed.add_field(name="Summoner", value="Summoner2\nSummoner3", inline=True)
+        embed.add_field(name="Level", value="2\n4", inline=True)
+        embed.add_field(name="Rank", value="Silver 3\nSilver 5", inline=True)
+        return embed
+
 
     def _extract_ranks(self, league):
         tier = league['tier'].lower().capitalize()
@@ -42,7 +61,7 @@ class LeagueProfiles(commands.Cog):
         embed = discord.Embed(color=0x00ff00)
         embed.set_author(
             name=name, icon_url=f"http://ddragon.leagueoflegends.com/cdn/10.18.1/img/profileicon/{icon}.png")
-        embed.set_thumbnail(url=self._get_highest_rank(ranks))
+        embed.set_thumbnail(url=self._get_highest_rank(ranks)["image"])
         for queue in ranks:
             embed.add_field(
                 name=queue['queue_type'],
@@ -72,7 +91,11 @@ class LeagueProfiles(commands.Cog):
             else:
                 if (highest_rank[0] < current_rank[0]):
                     highest_rank = current_rank
-        return highest_rank[1]
+        # return highest_rank[1]
+        return {
+            "image": highest_rank[1],
+            "rank": highest_rank,
+        }
 
     def _fill_blanks(self, ranks):
         new_ranks = ranks
