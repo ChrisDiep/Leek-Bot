@@ -26,3 +26,8 @@ class profile_requests:
         else:
             league_info = '404'
         return [profile_info, league_info]
+
+    def get_match_info(self, summoner_id):
+        url = f'{self.url}//lol/spectator/v4/active-games/by-summoner/{summoner_id}'
+        resp = requests.get(url, headers = self.headers)
+        return resp.json()
