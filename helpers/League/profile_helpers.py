@@ -13,9 +13,7 @@ def get_champions(version):
     champions_obj = resp.json()["data"]
     champion_ids = {}
     for champion in champions_obj:
-        print(champion)
         champion_ids[champions_obj[champion]["key"]] = champion
-    print(champion_ids)
     return champion_ids
 
 def get_version():
