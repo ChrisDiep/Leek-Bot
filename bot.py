@@ -10,6 +10,7 @@ client = commands.Bot(command_prefix='!')
 
 @client.event
 async def on_ready():
+    """ Indicates bot is ready and gets the application info """
     print('Bot is ready.')
     if not hasattr(client, 'appinfo'):
         client.appinfo = await client.application_info()
@@ -17,6 +18,7 @@ async def on_ready():
 
 @client.event
 async def on_error(event, *args, **kwargs):
+    """ Sends a direct message to the me when there is an error thrown """
     embed = discord.Embed(title=':x: Event Error',
                           colour=0xe74c3c)  # Red
     embed.add_field(name='Event', value=event)
@@ -27,6 +29,10 @@ async def on_error(event, *args, **kwargs):
 
 @client.event
 async def on_command_error(ctx, error):
+    """
+    Checks for errors from discord.py and raises an error if
+    the error is not specifically categorized here
+    """
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.channel.send(f'{ctx.author.mention} Command on cooldown, try again')
     elif isinstance(error, commands.CommandNotFound):
@@ -39,15 +45,13 @@ async def on_command_error(ctx, error):
 @client.command(name="ping", help="Replies with the bot latency")
 @commands.cooldown(1, 1, commands.BucketType.default)
 async def ping(ctx):
+    """ Tests the response time of the bot """
     await ctx.send(f'{round(client.latency * 1000)} ms')
 
+#Loads the cogs for the bot
 for filename in os.listdir('./Cogs/League'):
     if filename.endswith('.py'):
         client.load_extension(f'Cogs.League.{filename[:-3]}')
 
-# @client.command(name="test")
-# async def test(ctx, *args):
-#     parsed = ''.join(map(lambda word: re.sub(r'[^a-zA-Z0-9]','',word), args))
-#     await ctx.send(parsed)
 
 client.run(BOT.get('TOKEN'))
