@@ -34,7 +34,7 @@ async def on_command_error(ctx, error):
     the error is not specifically categorized here
     """
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.channel.send(f'{ctx.author.mention} Command on cooldown, try again')
+        await ctx.channel.send(f'{ctx.author.mention} Command on cooldown, please wait to try again')
     elif isinstance(error, commands.CommandNotFound):
         await ctx.channel.send(f'{ctx.author.mention} Command not found! Check your spelling')
     else:
@@ -48,10 +48,28 @@ async def ping(ctx):
     """ Tests the response time of the bot """
     await ctx.send(f'{round(client.latency * 1000)} ms')
 
+# @client.command(name="emoji")
+# async def print_emoji(ctx):
+#     emojis = discord.utils.get(client.emojis)
+#     print(type(emojis))
+#     emoji = discord.utils.get(client.emojis, name="diamond")
+#     await ctx.send(f'{str(emoji)} here')
+
+# @client.command(name="owner")
+# async def print_owner(ctx):
+#     await ctx.send(f'{client.appinfo.owner.mention} hello')
+
+
+@client.event
+async def on_message(message):
+    guild = client.get_guild(781361389679280168)
+    channel = guild.get_channel(798413003187159080)
+    if not message.guild:
+        await channel.send(f'{message.author}: {message.content}')
+
 #Loads the cogs for the bot
 for filename in os.listdir('./Cogs/League'):
     if filename.endswith('.py'):
         client.load_extension(f'Cogs.League.{filename[:-3]}')
-
 
 client.run(BOT.get('TOKEN'))
