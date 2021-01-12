@@ -18,7 +18,7 @@ class LeagueProfiles(commands.Cog):
         self.champion_ids = get_champions(self.version)
         self.queue_ids = write_queue_ids()
 
-    @commands.command(name="Rank", help="Prints out ranks of the user", aliases=['rank'])
+    @commands.command(name="Rank", help="Prints out ranks of the user, limited to 20 Requests per 120 seconds", aliases=['rank'])
     @commands.cooldown(20, 120, commands.BucketType.default)
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
@@ -31,7 +31,7 @@ class LeagueProfiles(commands.Cog):
             ranks_info = list(map(self._extract_ranks, profile_info[1]))
             await ctx.send(embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
 
-    @commands.command(name="Match", help="Prints out match information", aliases=["m", "match"])
+    @commands.command(name="Match", help="Prints out match information, limited to 4 Requests per 120 Seconds", aliases=["m", "match"])
     @commands.cooldown(4, 120, commands.BucketType.default)
     async def print_match_info(self, ctx, *summoner_name):
         API = profile_requests(BOT["API_KEY"])
