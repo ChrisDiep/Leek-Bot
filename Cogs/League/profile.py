@@ -8,12 +8,14 @@ from discord.ext import commands
 import sys
 from bot import client
 sys.path.append('/home/chris/Documents/VSCode/SideProjects/FVHSBot/')
+import os
 
 
 class LeagueProfiles(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.request = profile_requests(BOT.get("API_KEY"))
+        # self.request = profile_requests(BOT.get("API_KEY"))
+        self.request = profile_requests(os.getenv("API_KEY", "optional-default"))
         self.version = get_version()
         self.champion_ids = get_champions(self.version)
         self.queue_ids = write_queue_ids()
@@ -34,8 +36,7 @@ class LeagueProfiles(commands.Cog):
     @commands.command(name="Match", help="Prints out match information, limited to 4 Requests per 120 Seconds", aliases=["m", "match"])
     @commands.cooldown(4, 120, commands.BucketType.default)
     async def print_match_info(self, ctx, *summoner_name):
-        API = profile_requests(BOT["API_KEY"])
-        resp = API.get_match_info(clean_input(summoner_name))
+        resp = request.get_match_info(clean_input(summoner_name))
         # resp = get_match_info(summoner_name)
         # resp = json.load(open("dummy2.json"))
         if isinstance(resp, dict):
