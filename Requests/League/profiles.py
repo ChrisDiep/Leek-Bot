@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import requests
-
+import time
 
 class profile_requests:
     def __init__(self, api_key):
@@ -27,7 +27,47 @@ class profile_requests:
             league_info = '404'
         return [profile_info, league_info]
 
-    def get_match_info(self, summoner_id):
-        url = f'{self.url}//lol/spectator/v4/active-games/by-summoner/{summoner_id}'
-        resp = requests.get(url, headers = self.headers)
-        return resp.json()
+    def get_match_info(self, summoner_name):
+        summoner_id = self.get_summonerid(summoner_name)["id"]
+        url = f'{self.url}/lol/spectator/v4/active-games/by-summoner/{summoner_id}'
+        resp = requests.get(url, headers = self.headers).json()
+        if ('status' in resp):
+            return resp['status']['message']
+        else:
+            summ_ids = [player["summonerId"] for player in resp["participants"]]
+            summ_names = [player["summonerName"] for player in resp["participants"]]
+            time.sleep(0.25)
+            levels = self.get_levels(*summ_names)
+            # levels = []
+            time.sleep(0.25)
+            ranks = self.get_solo_ranks(*summ_ids)
+            match_info = {
+                "gameMode": resp["gameMode"],
+                "mapId": resp["mapId"],
+                "gameQueueConfigId": resp["gameQueueConfigId"],
+                "gameLength": resp["gameLength"],
+                "summoners": resp["participants"],
+                "levels": levels,
+                "ranks": ranks
+            }
+            return match_info
+
+    def get_levels(self, *args):
+        levels = []
+        for name in args:
+            sum_info = self.get_summonerid(name)
+            levels.append(sum_info["summonerLevel"])
+        return levels
+
+    def get_solo_ranks(self, *args):
+        player_ranks = []
+        for summ_id in args:
+            ranks = self.get_ranked_stats(summ_id)
+            added = False
+            for rank, index in zip(ranks, range(0,len(ranks))):
+                if rank["queueType"] == "RANKED_SOLO_5x5":
+                    player_ranks.append(rank)
+                    added = True
+            if not added:
+                player_ranks.append({})
+        return player_ranks
