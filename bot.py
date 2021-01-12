@@ -62,10 +62,11 @@ async def ping(ctx):
 
 @client.event
 async def on_message(message):
-    guild = client.get_guild(781361389679280168)
-    channel = guild.get_channel(798413003187159080)
     if not message.guild:
+        guild = client.get_guild(781361389679280168)
+        channel = guild.get_channel(798413003187159080)
         await channel.send(f'{message.author}: {message.content}')
+    await client.process_commands(message)
 
 #Loads the cogs for the bot
 for filename in os.listdir('./Cogs/League'):
