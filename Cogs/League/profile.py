@@ -1,20 +1,25 @@
+import datetime
+import json
 from safe import BOT
 from Requests.League.profiles import profile_requests
-from helpers.League.profile_helpers import clean_input
+from helpers.League.profile_helpers import clean_input, get_version, get_champions, write_queue_ids
 import discord
 from discord.ext import commands
 import sys
+from bot import client
 sys.path.append('/home/chris/Documents/VSCode/SideProjects/FVHSBot/')
 
-import json
 
 class LeagueProfiles(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.request = profile_requests(BOT.get("API_KEY"))
+        self.version = get_version()
+        self.champion_ids = get_champions(self.version)
+        self.queue_ids = write_queue_ids()
 
     @commands.command(name="Rank", help="Prints out ranks of the user", aliases=['rank'])
-    @commands.cooldown(1, 1, commands.BucketType.default)
+    @commands.cooldown(20, 120, commands.BucketType.default)
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
         profile_info = self.request.get_profile_info(parsed_name)
@@ -25,24 +30,79 @@ class LeagueProfiles(commands.Cog):
             profile_info[1] = self._fill_blanks(profile_info[1])
             ranks_info = list(map(self._extract_ranks, profile_info[1]))
             await ctx.send(embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
-    @commands.command(name="Match", help="Prints out match information", aliases=["m","match"])
-    async def print_match_info(self, ctx, *name):
-        parsed_name = clean_input(name)
-        f = open("dummy.json")
-        profile_info = json.load(f)
-        await ctx.send(f'{ctx.author.mention}',embed=self._build_match_embed(profile_info))
 
-    def _build_match_embed(self, match_info):
-        embed = discord.Embed(title=match_info["gameMode"], description=match_info["gameLength"])
-        # embed.add_field(name="Summoner", value="Summoner1", inline=True)
-        # embed.add_field(name="Level", value="1", inline=True)
-        # embed.add_field(name="Rank", value="Silver I", inline=True)
-        # embed.add_field(name="\u200B",value: "\u200B")
-        embed.add_field(name="Summoner", value="Summoner2\nSummoner3", inline=True)
-        embed.add_field(name="Level", value="2\n4", inline=True)
-        embed.add_field(name="Rank", value="Silver 3\nSilver 5", inline=True)
+    @commands.command(name="Match", help="Prints out match information", aliases=["m", "match"])
+    @commands.cooldown(4, 120, commands.BucketType.default)
+    async def print_match_info(self, ctx, *summoner_name):
+        API = profile_requests(BOT["API_KEY"])
+        resp = API.get_match_info(clean_input(summoner_name))
+        # resp = get_match_info(summoner_name)
+        # resp = json.load(open("dummy2.json"))
+        if isinstance(resp, dict):
+            embed_info = {
+                "gameMode": resp["gameMode"],
+                "mapId": resp["mapId"],
+                "gameLength": resp["gameLength"],
+                "gameQueueConfigId": resp["gameQueueConfigId"],
+                "summoners": [],
+                "levels": resp["levels"],
+                "ranks": []
+            }
+            # f = open("dummy.json")
+            # profile_info = json.load(f)
+            # f1 = open("dummy_profiles.json")
+            # ranks = json.load(f1)
+            # embed_info["gameMode"] = profile_info["gameMode"]
+            # embed_info["mapId"] = profile_info["mapId"]
+            # embed_info["gameLength"] = profile_info["gameLength"]
+            # embed_info["gameQueueConfigId"] = profile_info["gameQueueConfigId"]
+            for summoner, index in zip(resp["summoners"], range(0, len(resp["summoners"]))):
+                emoji_summoner = discord.utils.get(
+                    client.emojis, name=self.champion_ids[str(summoner["championId"])])
+                emoji_rank = emoji_rank = discord.utils.get(
+                    client.emojis, name='unranked')
+                tier = "Unranked"
+                rank = ""
+                lp = ""
+                wrapped_lp = ""
+                if "tier" in resp["ranks"][index]:
+                    emoji_rank = discord.utils.get(
+                        client.emojis, name=resp["ranks"][index]["tier"].lower())
+                    tier = resp["ranks"][index]["tier"]
+                    rank = resp["ranks"][index]["rank"]
+                    lp = str(resp["ranks"][index]["leaguePoints"])
+                    wrapped_lp = f'({lp} LP)'
+                embed_info["summoners"].append(
+                    f'{str(emoji_summoner)} {summoner["summonerName"]}')
+                embed_info["ranks"].append(
+                    f'{str(emoji_rank)} {tier.title()} {rank} {wrapped_lp}'
+                )
+            await ctx.send(f'{ctx.author.mention}', embed=self._build_match_embed(embed_info))
+        else:
+            await ctx.send(f'{ctx.author.mention}, {summoner_name} doesn\'t seems to be in a game')
+
+    def _build_match_embed(self, info):
+        # info["levels"] = ["2", "3", "4", "5",
+        #                   "54", "520", "213", "123", "12", "123"]
+        half_num_summoners = int(len(info["summoners"])/2) - 1
+        info["summoners"][half_num_summoners] = f"{info['summoners'][half_num_summoners]}\n"
+        info["ranks"][half_num_summoners] = f"{info['ranks'][half_num_summoners]}\n"
+        info["levels"][half_num_summoners] = f"{info['levels'][half_num_summoners]}\n"
+        summoners = '\n'.join(info["summoners"])
+        levels = [str(i).center(5, ' ') for i in info["levels"]]
+        levels = '\n'.join(levels)
+        ranks = '\n'.join(info["ranks"])
+        game_time = f'{int(info["gameLength"]/60)}:{info["gameLength"]%60}'
+        queue_info = self.queue_ids[info["gameQueueConfigId"]]
+        title = queue_info["description"] if queue_info["description"] is not None else "Custom"
+        embed = discord.Embed(
+            title=f'{title} | {game_time}')
+        embed.add_field(name="Summoner", value=summoners, inline=True)
+        embed.add_field(name="Rank", value=ranks, inline=True)
+        embed.add_field(name="Level", value=levels, inline=True)
+        embed.set_footer(
+            text=f'Questions or Suggestions? Message {client.appinfo.owner.display_name}')
         return embed
-
 
     def _extract_ranks(self, league):
         tier = league['tier'].lower().capitalize()
@@ -60,7 +120,7 @@ class LeagueProfiles(commands.Cog):
     def _build_ranked_embed(self, name, icon, ranks):
         embed = discord.Embed(color=0x00ff00)
         embed.set_author(
-            name=name, icon_url=f"http://ddragon.leagueoflegends.com/cdn/10.18.1/img/profileicon/{icon}.png")
+            name=name, icon_url=f"http://ddragon.leagueoflegends.com/cdn/{self.version}/img/profileicon/{icon}.png")
         embed.set_thumbnail(url=self._get_highest_rank(ranks)["image"])
         for queue in ranks:
             embed.add_field(
