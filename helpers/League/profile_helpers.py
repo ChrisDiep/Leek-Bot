@@ -40,9 +40,11 @@ def get_id(version):
 
 def write_queue_ids():
     queue_ids = json.load(open("dummy_queues.json"))
+    queue_obj = {}
     for queue in queue_ids:
         if queue["notes"] is None:
             if queue["description"] is not None:
                 queue["description"] = queue["description"].replace(
                     ' games', '')
-            print(queue)
+            queue_obj[queue["queueId"]] = queue
+    return queue_obj
