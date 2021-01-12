@@ -31,7 +31,7 @@ class LeagueProfiles(commands.Cog):
             summonerIconID = profile_info[0]['profileIconId']
             profile_info[1] = self._fill_blanks(profile_info[1])
             ranks_info = list(map(self._extract_ranks, profile_info[1]))
-            await ctx.send(embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
+            await ctx.send(f'{ctx.author.mention}', embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
 
     @commands.command(name="Match", help="Prints out match information, limited to 4 Requests per 120 Seconds", aliases=["m", "match"])
     @commands.cooldown(4, 120, commands.BucketType.default)
