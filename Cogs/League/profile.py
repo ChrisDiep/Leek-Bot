@@ -36,7 +36,7 @@ class LeagueProfiles(commands.Cog):
     @commands.command(name="Match", help="Prints out match information, limited to 4 Requests per 120 Seconds", aliases=["m", "match"])
     @commands.cooldown(4, 120, commands.BucketType.default)
     async def print_match_info(self, ctx, *summoner_name):
-        resp = request.get_match_info(clean_input(summoner_name))
+        resp = self.request.get_match_info(clean_input(summoner_name))
         # resp = get_match_info(summoner_name)
         # resp = json.load(open("dummy2.json"))
         if isinstance(resp, dict):
