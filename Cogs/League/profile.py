@@ -1,6 +1,6 @@
 import datetime
 import json
-from safe import BOT
+# from safe import BOT
 from Requests.League.profiles import profile_requests
 from helpers.League.profile_helpers import clean_input, get_version, get_champions, write_queue_ids
 import discord

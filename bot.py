@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from safe import BOT
+# from safe import BOT
 import os
 import re
 import traceback
