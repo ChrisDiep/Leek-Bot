@@ -18,7 +18,6 @@ def get_champions(version):
     champion_ids = {}
     for champion in champions_obj:
         champion_ids[champions_obj[champion]["key"]] = champion
-    print(champion_ids)
     return champion_ids
 
 
