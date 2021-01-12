@@ -101,7 +101,7 @@ class LeagueProfiles(commands.Cog):
         embed.add_field(name="Rank", value=ranks, inline=True)
         embed.add_field(name="Level", value=levels, inline=True)
         embed.set_footer(
-            text=f'Questions or Suggestions? Message {client.appinfo.owner.display_name}')
+            text=f'Questions or Suggestions? Message {client.appinfo.owner.display_name} or DM the bot itself')
         return embed
 
     def _extract_ranks(self, league):
