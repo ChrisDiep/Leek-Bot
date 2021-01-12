@@ -129,6 +129,8 @@ class LeagueProfiles(commands.Cog):
                 value=f'Rank: {queue["tier"]} {queue["rank"]} \n W/L: {queue["wins"]}/{queue["losses"]} \n LP: {queue["league_points"]}',
                 inline=True
             )
+        embed.set_footer(
+            text=f'Questions or Suggestions? Message {client.appinfo.owner.display_name} or DM the bot itself')
         return embed
 
     def _get_highest_rank(self, ranks):
