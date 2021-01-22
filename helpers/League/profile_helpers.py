@@ -1,6 +1,6 @@
 import re
 import requests
-
+from discord.ext import commands
 import json
 
 
@@ -47,3 +47,9 @@ def write_queue_ids():
                     ' games', '')
             queue_obj[queue["queueId"]] = queue
     return queue_obj
+
+
+class APIKeyExpired(commands.CommandError):
+    """ Custom error for when API key expires """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
