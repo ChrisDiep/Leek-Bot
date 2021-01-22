@@ -1,4 +1,4 @@
 safe.py
 .vscode
-.json
+*.json
 __pycache__
