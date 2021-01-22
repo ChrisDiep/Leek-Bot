@@ -25,15 +25,15 @@ class LeagueProfiles(commands.Cog):
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
         profile_info = self.request.get_profile_info(parsed_name)
-        if profile_info[1] == 404:
-            await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
-        elif profile_info[1] == 403:
-            raise APIKeyExpired(ctx.message.author)
-        else:
+        if isinstance(profile_info, list):
             summonerIconID = profile_info[0]['profileIconId']
             profile_info[1] = self._fill_blanks(profile_info[1])
             ranks_info = list(map(self._extract_ranks, profile_info[1]))
             await ctx.send(f'{ctx.author.mention}', embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
+        elif profile_info == 404:
+            await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
+        elif profile_info == 403:
+            raise commands.CommandInvokeError(APIKeyExpired(ctx.message.author))
 
     @commands.command(name="Match", help="Prints out match information, limited to 4 Requests per 120 Seconds", aliases=["m", "match"])
     @commands.cooldown(4, 120, commands.BucketType.default)
