@@ -1,14 +1,14 @@
 import datetime
 import json
-# from safe import BOT
 from Requests.League.profiles import profile_requests
-from helpers.League.profile_helpers import clean_input, get_version, get_champions, write_queue_ids
+from helpers.League.profile_helpers import clean_input, get_version, get_champions, write_queue_ids, APIKeyExpired
 import discord
 from discord.ext import commands
 import sys
 from bot import client
 sys.path.append('/home/chris/Documents/VSCode/SideProjects/FVHSBot/')
 import os
+from safe import BOT
 
 
 class LeagueProfiles(commands.Cog):
@@ -25,13 +25,15 @@ class LeagueProfiles(commands.Cog):
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
         profile_info = self.request.get_profile_info(parsed_name)
-        if (profile_info[1] == '404'):
-            await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
-        else:
+        if isinstance(profile_info, list):
             summonerIconID = profile_info[0]['profileIconId']
             profile_info[1] = self._fill_blanks(profile_info[1])
             ranks_info = list(map(self._extract_ranks, profile_info[1]))
             await ctx.send(f'{ctx.author.mention}', embed=self._build_ranked_embed(profile_info[0]['name'], summonerIconID, ranks_info))
+        elif profile_info == 404:
+            await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
+        elif profile_info == 403:
+            raise commands.CommandInvokeError(APIKeyExpired())
 
     @commands.command(name="Match", help="Prints out match information, limited to 4 Requests per 120 Seconds", aliases=["m", "match"])
     @commands.cooldown(4, 120, commands.BucketType.default)
@@ -79,8 +81,12 @@ class LeagueProfiles(commands.Cog):
                     f'{str(emoji_rank)} {tier.title()} {rank} {wrapped_lp}'
                 )
             await ctx.send(f'{ctx.author.mention}', embed=self._build_match_embed(embed_info))
-        else:
-            await ctx.send(f'{ctx.author.mention}, {summoner_name} doesn\'t seems to be in a game')
+        elif resp == 400:
+            await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
+        elif resp == 404:
+            await ctx.send(f'{ctx.author.mention}, {" ".join(summoner_name)} doesn\'t appear to be in a game')
+        elif resp == 403:
+            raise commands.CommandInvokeError(APIKeyExpired(ctx.message.author))
 
     def _build_match_embed(self, info):
         # info["levels"] = ["2", "3", "4", "5",

@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands
-# from safe import BOT
 import os
 import re
 import traceback
 import datetime
+from helpers.League.profile_helpers import APIKeyExpired
 client = commands.Bot(command_prefix='!')
+from safe import BOT
 
 
 @client.event
@@ -37,6 +38,10 @@ async def on_command_error(ctx, error):
         await ctx.channel.send(f'{ctx.author.mention} Command on cooldown, please wait to try again')
     elif isinstance(error, commands.CommandNotFound):
         await ctx.channel.send(f'{ctx.author.mention} Command not found! Check your spelling')
+    elif isinstance(error, commands.CommandInvokeError):
+        if isinstance(error.original, APIKeyExpired):
+            await client.appinfo.owner.send("API Key Expired")
+            await ctx.channel.send(f'{ctx.author.mention} API Key expired, bot author messaged')
     else:
         await ctx.channel.send(f'{ctx.author.mention} Error! Issue sent to bot author')
         raise error

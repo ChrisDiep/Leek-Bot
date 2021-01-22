@@ -23,16 +23,28 @@ class profile_requests:
         profile_info = self.get_summonerid(summoner_name)
         if ('id' in profile_info):
             league_info = self.get_ranked_stats(profile_info['id'])
+            return [profile_info, league_info]
+        elif 'status' in profile_info:
+            return profile_info['status']['status_code']
         else:
-            league_info = '404'
-        return [profile_info, league_info]
+            return None
 
     def get_match_info(self, summoner_name):
-        summoner_id = self.get_summonerid(summoner_name)["id"]
-        url = f'{self.url}/lol/spectator/v4/active-games/by-summoner/{summoner_id}'
+        """ Gets the active match information """
+        summoner_id = self.get_summonerid(summoner_name)
+        #Returns the 404 status if summoner is not found
+        if 'status' in summoner_id:
+            status_code = summoner_id['status']['status_code']
+            if status_code == 403:
+                return status_code
+            elif status_code == 404:
+                return 400
+        url = f'{self.url}/lol/spectator/v4/active-games/by-summoner/{summoner_id["id"]}'
         resp = requests.get(url, headers = self.headers).json()
-        if ('status' in resp):
-            return resp['status']['message']
+        #Returns the error message if the request summoner is not in game
+        if 'status' in resp:
+            return resp['status']['status_code']
+        #Returns the game information if the summoner is found & is in a game
         else:
             summ_ids = [player["summonerId"] for player in resp["participants"]]
             summ_names = [player["summonerName"] for player in resp["participants"]]
