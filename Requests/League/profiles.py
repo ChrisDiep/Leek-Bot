@@ -24,7 +24,7 @@ class profile_requests:
         if ('id' in profile_info):
             league_info = self.get_ranked_stats(profile_info['id'])
         else:
-            league_info = '404'
+            league_info = 404
         return [profile_info, league_info]
 
     def get_match_info(self, summoner_name):
