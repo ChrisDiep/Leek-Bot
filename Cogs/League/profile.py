@@ -2,7 +2,7 @@ import datetime
 import json
 # from safe import BOT
 from Requests.League.profiles import profile_requests
-from helpers.League.profile_helpers import clean_input, get_version, get_champions, write_queue_ids
+from helpers.League.profile_helpers import clean_input, get_version, get_champions, write_queue_ids, APIKeyExpired
 import discord
 from discord.ext import commands
 import sys
@@ -79,6 +79,10 @@ class LeagueProfiles(commands.Cog):
                     f'{str(emoji_rank)} {tier.title()} {rank} {wrapped_lp}'
                 )
             await ctx.send(f'{ctx.author.mention}', embed=self._build_match_embed(embed_info))
+        elif resp == 404:
+            await ctx.send(f'{ctx.author.mention}, {" ".join(summoner_name)} doesn\'t appear to be in a game')
+        elif resp == 403:
+            raise APIKeyExpired(ctx.message.author)
         else:
             await ctx.send(f'{ctx.author.mention}, {summoner_name} doesn\'t seems to be in a game')
 
