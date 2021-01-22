@@ -37,7 +37,7 @@ class profile_requests:
         resp = requests.get(url, headers = self.headers).json()
         #Returns the error message if the request summoner is not in game
         if 'status' in resp:
-            return resp['status']['message']
+            return resp['status']['status_code']
         #Returns the game information if the summoner is found & is in a game
         else:
             summ_ids = [player["summonerId"] for player in resp["participants"]]
