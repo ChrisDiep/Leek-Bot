@@ -1,6 +1,5 @@
 import datetime
 import json
-# from safe import BOT
 from Requests.League.profiles import profile_requests
 from helpers.League.profile_helpers import clean_input, get_version, get_champions, write_queue_ids, APIKeyExpired
 import discord
@@ -9,6 +8,7 @@ import sys
 from bot import client
 sys.path.append('/home/chris/Documents/VSCode/SideProjects/FVHSBot/')
 import os
+from safe import BOT
 
 
 class LeagueProfiles(commands.Cog):
@@ -25,8 +25,10 @@ class LeagueProfiles(commands.Cog):
     async def print_ranked_stats(self, ctx, *name):
         parsed_name = clean_input(name)
         profile_info = self.request.get_profile_info(parsed_name)
-        if (profile_info[1] == '404'):
+        if profile_info[1] == 404:
             await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
+        elif profile_info[1] == 403:
+            raise APIKeyExpired(ctx.message.author)
         else:
             summonerIconID = profile_info[0]['profileIconId']
             profile_info[1] = self._fill_blanks(profile_info[1])
