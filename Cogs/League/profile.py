@@ -14,8 +14,8 @@ from safe import BOT
 class LeagueProfiles(commands.Cog):
     def __init__(self, client):
         self.client = client
-        # self.request = profile_requests(BOT.get("API_KEY"))
-        self.request = profile_requests(os.getenv("API_KEY", "optional-default"))
+        self.request = profile_requests(BOT.get("API_KEY"))
+        # self.request = profile_requests(os.getenv("API_KEY", "optional-default"))
         self.version = get_version()
         self.champion_ids = get_champions(self.version)
         self.queue_ids = write_queue_ids()
@@ -81,12 +81,12 @@ class LeagueProfiles(commands.Cog):
                     f'{str(emoji_rank)} {tier.title()} {rank} {wrapped_lp}'
                 )
             await ctx.send(f'{ctx.author.mention}', embed=self._build_match_embed(embed_info))
+        elif resp == 400:
+            await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
         elif resp == 404:
             await ctx.send(f'{ctx.author.mention}, {" ".join(summoner_name)} doesn\'t appear to be in a game')
         elif resp == 403:
-            raise APIKeyExpired(ctx.message.author)
-        else:
-            await ctx.send(f'{ctx.author.mention}, {summoner_name} doesn\'t seems to be in a game')
+            raise commands.CommandInvokeError(APIKeyExpired(ctx.message.author))
 
     def _build_match_embed(self, info):
         # info["levels"] = ["2", "3", "4", "5",
