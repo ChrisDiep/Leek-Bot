@@ -14,8 +14,8 @@ from safe import BOT
 class LeagueProfiles(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.request = profile_requests(BOT.get("API_KEY"))
-        # self.request = profile_requests(os.getenv("API_KEY", "optional-default"))
+        # self.request = profile_requests(BOT.get("API_KEY"))
+        self.request = profile_requests(os.getenv("API_KEY", "optional-default"))
         self.version = get_version()
         self.champion_ids = get_champions(self.version)
         self.queue_ids = write_queue_ids()

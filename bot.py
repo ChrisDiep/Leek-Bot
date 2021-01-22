@@ -78,6 +78,6 @@ for filename in os.listdir('./Cogs/League'):
     if filename.endswith('.py'):
         client.load_extension(f'Cogs.League.{filename[:-3]}')
 
-client.run(BOT.get('TOKEN'))
-# client.run(os.getenv("TOKEN", "optional-default"))
+# client.run(BOT.get('TOKEN'))
+client.run(os.getenv("TOKEN", "optional-default"))
 
