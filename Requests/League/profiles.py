@@ -23,9 +23,11 @@ class profile_requests:
         profile_info = self.get_summonerid(summoner_name)
         if ('id' in profile_info):
             league_info = self.get_ranked_stats(profile_info['id'])
+            return [profile_info, league_info]
+        elif 'status' in profile_info:
+            return profile_info['status']['status_code']
         else:
-            league_info = 404
-        return [profile_info, league_info]
+            return None
 
     def get_match_info(self, summoner_name):
         """ Gets the active match information """
