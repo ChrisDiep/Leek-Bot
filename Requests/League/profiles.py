@@ -31,11 +31,15 @@ class profile_requests:
 
     def get_match_info(self, summoner_name):
         """ Gets the active match information """
-        summoner_id = self.get_summonerid(summoner_name)["id"]
+        summoner_id = self.get_summonerid(summoner_name)
         #Returns the 404 status if summoner is not found
         if 'status' in summoner_id:
-            return summoner_id['status']['status_code']
-        url = f'{self.url}/lol/spectator/v4/active-games/by-summoner/{summoner_id}'
+            status_code = summoner_id['status']['status_code']
+            if status_code == 403:
+                return status_code
+            elif status_code == 404:
+                return 400
+        url = f'{self.url}/lol/spectator/v4/active-games/by-summoner/{summoner_id["id"]}'
         resp = requests.get(url, headers = self.headers).json()
         #Returns the error message if the request summoner is not in game
         if 'status' in resp:
