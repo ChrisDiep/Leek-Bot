@@ -33,7 +33,7 @@ class LeagueProfiles(commands.Cog):
         elif profile_info == 404:
             await ctx.send(f'{ctx.author.mention} Error, Summoner not found!')
         elif profile_info == 403:
-            raise commands.CommandInvokeError(APIKeyExpired(ctx.message.author))
+            raise commands.CommandInvokeError(APIKeyExpired())
 
     @commands.command(name="Match", help="Prints out match information, limited to 4 Requests per 120 Seconds", aliases=["m", "match"])
     @commands.cooldown(4, 120, commands.BucketType.default)
