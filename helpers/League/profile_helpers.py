@@ -52,4 +52,5 @@ def write_queue_ids():
 class APIKeyExpired(commands.CommandError):
     """ Custom error for when API key expires """
     def __init__(self, *args, **kwargs):
+        self.args = args
         super().__init__(*args, **kwargs)
