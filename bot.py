@@ -6,7 +6,7 @@ import traceback
 import datetime
 from helpers.League.profile_helpers import APIKeyExpired
 client = commands.Bot(command_prefix='!')
-from safe import BOT
+# from safe import BOT
 
 
 @client.event
