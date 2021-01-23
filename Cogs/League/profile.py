@@ -8,7 +8,7 @@ import sys
 from bot import client
 sys.path.append('/home/chris/Documents/VSCode/SideProjects/FVHSBot/')
 import os
-from safe import BOT
+# from safe import BOT
 
 
 class LeagueProfiles(commands.Cog):
