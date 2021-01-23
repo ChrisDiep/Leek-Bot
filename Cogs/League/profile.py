@@ -86,7 +86,7 @@ class LeagueProfiles(commands.Cog):
         elif resp == 404:
             await ctx.send(f'{ctx.author.mention}, {" ".join(summoner_name)} doesn\'t appear to be in a game')
         elif resp == 403:
-            raise commands.CommandInvokeError(APIKeyExpired(ctx.message.author))
+            raise commands.CommandInvokeError(APIKeyExpired())
 
     def _build_match_embed(self, info):
         # info["levels"] = ["2", "3", "4", "5",
