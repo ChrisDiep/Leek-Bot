@@ -108,7 +108,7 @@ class LeagueProfiles(commands.Cog):
         embed.add_field(name="Rank", value=ranks, inline=True)
         embed.add_field(name="Level", value=levels, inline=True)
         embed.set_footer(
-            text=f'Questions or Suggestions? Message {client.appinfo.owner.display_name} or DM the bot itself')
+            text=f'Questions or Suggestions? DM the bot')
         return embed
 
     def _extract_ranks(self, league):
@@ -136,7 +136,7 @@ class LeagueProfiles(commands.Cog):
                 inline=True
             )
         embed.set_footer(
-            text=f'Questions or Suggestions? Message {client.appinfo.owner.display_name} or DM the bot itself')
+            text=f'Questions or Suggestions? DM the bot')
         return embed
 
     def _get_highest_rank(self, ranks):
