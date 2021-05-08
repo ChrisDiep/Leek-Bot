@@ -3,12 +3,12 @@ Leek is a Discord bot that provides League of Legends related statistics and inf
 ## Showcase
 ### Profile Info
 <div>
-  <img src="https://i.imgur.com/AZXy0M8.png" height="250">
+  <img src="https://i.imgur.com/xIvn4qZ.png" height="250">
 </div>
 
 ### Match Info
 <div>
-  <img src="https://i.imgur.com/ZSE5kmy.png" height="350">
+  <img src="https://i.imgur.com/exQyHMq.png" height="350">
 </div>
 
 ### Direct Message Error Forwarding
